@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
@@ -18,7 +19,9 @@ import javax.swing.JOptionPane;
  * @author Usuario
  */
 public class JFramePrincipal extends javax.swing.JFrame {
-HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
+
+    HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
+
     /**
      * Creates new form JFramePrincipal
      */
@@ -26,61 +29,58 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
         initComponents();
         loadDataFromDatabase();
     }
-    
+
     private void loadDataFromDatabase() {
         optionsMap = new HashMap<>();
-        try (Connection connection = DatabaseConnection.getConnection()) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
             // Cargar las categorías (Planetas)
             String sqlPlanetas = "SELECT nombre FROM planetas";
-            try (PreparedStatement statementPlanetas = connection.prepareStatement(sqlPlanetas);
-                ResultSet resultSetPlanetas = statementPlanetas.executeQuery()) {
+            PreparedStatement statementPlanetas = connection.prepareStatement(sqlPlanetas); 
+                ResultSet resultSetPlanetas = statementPlanetas.executeQuery();
                 while (resultSetPlanetas.next()) {
                     String planeta = resultSetPlanetas.getString("nombre");
                     ComboBox_planetas.addItem(planeta);
                 }
-            }
+            
 
             // Cargar los satélites correspondientes
             String sqlSatelites = "SELECT p.nombre AS planeta, s.nombre AS satelite FROM planetas p JOIN satelites s ON p.id = s.planeta_id";
-            try (PreparedStatement statementSatelites = connection.prepareStatement(sqlSatelites);
-                ResultSet resultSetSatelites = statementSatelites.executeQuery()) {
+            Statement statementSatelites = connection.createStatement(); 
+            ResultSet resultSetSatelites = statementSatelites.executeQuery(sqlSatelites);
                 while (resultSetSatelites.next()) {
                     String planeta = resultSetSatelites.getString("planeta");
                     String satelite = resultSetSatelites.getString("satelite");
                     optionsMap.computeIfAbsent(planeta, k -> new ArrayList<>()).add(satelite);
                 }
-            }
-                // Cargar los datos del sol
-            String sqlEstrellas = "SELECT * FROM Estrellas";
-            try (PreparedStatement statementSol = connection.prepareStatement(sqlEstrellas);
-                 ResultSet resultSetEstrellas = statementSol.executeQuery()) {
+            
+            // Cargar los datos del sol
+            String sqlEstrellas = "SELECT * FROM Estrellas where nombre = 'Sol'";
+            Statement statementSol = connection.createStatement(); 
+            ResultSet resultSetEstrellas = statementSol.executeQuery(sqlEstrellas);
                 if (resultSetEstrellas.next()) {
-                    // Actualizar los JLabel con la información del sol
+                    // Actualizar los JLabel del sol
                     jLabel_estrella.setText(resultSetEstrellas.getString("nombre"));
-                    jLabel_radioEstrella.setText(resultSetEstrellas.getString("radio_km"));
-                    jLabel_distanciaEstrella.setText(resultSetEstrellas.getString("distancia_media_tierra_mkm"));
-                    jLabel_temperaturaEstrella.setText(resultSetEstrellas.getString("temperatura_superficial_c"));
+                    jLabel_radioEstrella.setText(resultSetEstrellas.getString("radio_km")+" km");
+                    jLabel_distanciaEstrella.setText(resultSetEstrellas.getString("distancia_media_tierra_mkm")+" Gm");
+                    jLabel_temperaturaEstrella.setText(resultSetEstrellas.getString("temperatura_superficial_c")+" ºC");
                     jLabel_tipoEstrella.setText(resultSetEstrellas.getString("tipo_estrella"));
                     String originalString = resultSetEstrellas.getString("composicion");
 
-                    // Dividir el string original en partes
+                    // Dividir los componentes en tres lineas
                     String[] partes = originalString.split(", ");
-                    String resultado="<html>";
+                    String resultado = "<html>";
                     for (String parte : partes) {
-                    resultado+=parte+"<p>";
+                        resultado += parte + "<p>";
                     }
-                    resultado+="<html>";
+                    resultado += "<html>";
                     jLabel_composicionEstrella.setText(resultado);
 
                 }
-            }
-
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-  
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -117,12 +117,12 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
         jLabel24 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
-        jLabel26 = new javax.swing.JLabel();
-        jLabel27 = new javax.swing.JLabel();
-        jLabel28 = new javax.swing.JLabel();
-        jLabel29 = new javax.swing.JLabel();
-        jLabel30 = new javax.swing.JLabel();
+        jLabeltexto_satelite = new javax.swing.JLabel();
+        jLabeltexto_radioSatelite = new javax.swing.JLabel();
+        jLabeltexto_distanciaSatelite = new javax.swing.JLabel();
+        jLabeltexto_periodoSatelite = new javax.swing.JLabel();
+        jLabeltexto_temperaturaSatelite = new javax.swing.JLabel();
+        jLabeltexto_tipoSatelite = new javax.swing.JLabel();
         jLabel_distanciaPlaneta = new javax.swing.JLabel();
         jLabel_periodoPlaneta = new javax.swing.JLabel();
         jLabel_temperaturaPlaneta = new javax.swing.JLabel();
@@ -138,20 +138,24 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
         jLabel_fotoPlaneta = new javax.swing.JLabel();
         jSeparator2 = new javax.swing.JSeparator();
         jLabel_fotoSatelite = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel_fechaPlaneta = new javax.swing.JLabel();
+        jLabeltexto_fechaSatelite = new javax.swing.JLabel();
+        jLabel_fechaSatelite = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(4, 4, 6));
 
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 30)); // NOI18N
         jLabel1.setText("Estrella:");
 
-        jLabel_estrella.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel_estrella.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
         jLabel_estrella.setText("Sol");
 
-        jLabel3.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Segoe UI Symbol", 1, 18)); // NOI18N
         jLabel3.setText("Tipo de estrella:");
 
-        jLabel4.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
+        jLabel4.setFont(new java.awt.Font("Segoe UI Symbol", 1, 18)); // NOI18N
         jLabel4.setText("Radio:");
 
         jLabel_tipoEstrella.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
@@ -160,13 +164,13 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
         jLabel_radioEstrella.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
         jLabel_radioEstrella.setText("asdfas");
 
-        jLabel7.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
+        jLabel7.setFont(new java.awt.Font("Segoe UI Symbol", 1, 18)); // NOI18N
         jLabel7.setText("Temperatura: ");
 
-        jLabel8.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
+        jLabel8.setFont(new java.awt.Font("Segoe UI Symbol", 1, 18)); // NOI18N
         jLabel8.setText("Distacia Media:");
 
-        jLabel9.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
+        jLabel9.setFont(new java.awt.Font("Segoe UI Symbol", 1, 18)); // NOI18N
         jLabel9.setText("Composicion:");
 
         jLabel_temperaturaEstrella.setFont(new java.awt.Font("Segoe UI Symbol", 0, 18)); // NOI18N
@@ -186,59 +190,64 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
         });
 
         ComboBox_satelites.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        ComboBox_satelites.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ComboBox_satelitesActionPerformed(evt);
+            }
+        });
 
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/SolPrueba.jpg"))); // NOI18N
 
-        jLabel14.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel14.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel14.setText("Planeta:");
 
-        jLabel16.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel16.setFont(new java.awt.Font("Segoe UI Symbol", 1, 18)); // NOI18N
         jLabel16.setText("Planetas:");
 
-        jLabel_planeta.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel_planeta.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel_planeta.setText("jLabel15");
 
-        jLabel17.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel17.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel17.setText("Radio:");
 
         jLabel_radioPlaneta.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel_radioPlaneta.setText("jLabel18");
 
-        jLabel19.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel19.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel19.setText("Distancia Media:");
 
-        jLabel20.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel20.setText("Periodo Orbital:");
 
-        jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel21.setText("Temperatura Media:");
 
-        jLabel22.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel22.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel22.setText("Tipo de Planeta:");
 
-        jLabel23.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel23.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel23.setText("Numero de Satelites:");
 
-        jLabel24.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel24.setText("Satelites:");
 
-        jLabel25.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel25.setText("Satelite:");
+        jLabeltexto_satelite.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabeltexto_satelite.setText("Satelite:");
 
-        jLabel26.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel26.setText("Radio:");
+        jLabeltexto_radioSatelite.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabeltexto_radioSatelite.setText("Radio:");
 
-        jLabel27.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel27.setText("Distancia Media:");
+        jLabeltexto_distanciaSatelite.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabeltexto_distanciaSatelite.setText("Distancia Media:");
 
-        jLabel28.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel28.setText("Periodo Orbital:");
+        jLabeltexto_periodoSatelite.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabeltexto_periodoSatelite.setText("Periodo Orbital:");
 
-        jLabel29.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel29.setText("Temperatura Media:");
+        jLabeltexto_temperaturaSatelite.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabeltexto_temperaturaSatelite.setText("Temperatura Media:");
 
-        jLabel30.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel30.setText("Tipo de Cuerpo:");
+        jLabeltexto_tipoSatelite.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        jLabeltexto_tipoSatelite.setText("Tipo de Cuerpo:");
 
         jLabel_distanciaPlaneta.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel_distanciaPlaneta.setText("jLabel31");
@@ -272,7 +281,7 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
 
         jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
-        jLabel_Satelite.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel_Satelite.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jLabel_Satelite.setText("jLabel41");
 
         jLabel_fotoPlaneta.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Tierra.jpg"))); // NOI18N
@@ -280,21 +289,33 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
         jLabel_fotoSatelite.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Luna.jpg"))); // NOI18N
         jLabel_fotoSatelite.setText("jLabel5");
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel2.setText("Fecha creacion:");
+
+        jLabel_fechaPlaneta.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel_fechaPlaneta.setText("jLabel5");
+
+        jLabeltexto_fechaSatelite.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabeltexto_fechaSatelite.setText("Fecha creación:");
+
+        jLabel_fechaSatelite.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel_fechaSatelite.setText("jLabel6");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap(25, Short.MAX_VALUE)
+                .addGap(32, 32, 32)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel_estrella, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel1)
+                                .addGap(14, 14, 14)
+                                .addComponent(jLabel_estrella))
                             .addComponent(jLabel13))
-                        .addGap(18, 30, Short.MAX_VALUE)
+                        .addGap(48, 48, 48)
                         .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -322,10 +343,10 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
                                 .addComponent(jLabel9)
                                 .addGap(11, 11, 11)
                                 .addComponent(jLabel_composicionEstrella)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, 0)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 44, Short.MAX_VALUE)
+                        .addGap(40, 40, 40)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel24)
@@ -336,27 +357,23 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_planeta))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel26)
+                                .addComponent(jLabeltexto_radioSatelite)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_radioSatelite))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel28)
+                                .addComponent(jLabeltexto_periodoSatelite)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_periodoSatelite))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel30)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel_tipoSatelite))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel25)
+                                .addComponent(jLabeltexto_satelite)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_Satelite))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel27)
+                                .addComponent(jLabeltexto_distanciaSatelite)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_distanciaSatelite))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel29)
+                                .addComponent(jLabeltexto_temperaturaSatelite)
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_temperaturaSatelite))
                             .addGroup(layout.createSequentialGroup()
@@ -376,20 +393,32 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
                                 .addGap(18, 18, 18)
                                 .addComponent(jLabel_temperaturaPlaneta))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel22)
+                                .addComponent(jLabeltexto_tipoSatelite)
                                 .addGap(18, 18, 18)
-                                .addComponent(jLabel_TipoPlaneta))
+                                .addComponent(jLabel_tipoSatelite, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel23)
                                 .addGap(18, 18, 18)
-                                .addComponent(jLabel_numSatelites)))
-                        .addGap(105, 105, 105)
+                                .addComponent(jLabel_numSatelites))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel22)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel_TipoPlaneta, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(69, 69, 69)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabeltexto_fechaSatelite)
+                                .addGap(18, 18, 18)
+                                .addComponent(jLabel_fechaSatelite))
                             .addComponent(jLabel_fotoPlaneta)
-                            .addComponent(jLabel_fotoSatelite, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 46, Short.MAX_VALUE))
+                            .addComponent(jLabel_fotoSatelite, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel_fechaPlaneta)))
+                        .addGap(50, 50, 50))
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(0, 0, 0)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 688, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -443,41 +472,49 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
                                 .addComponent(jLabel13))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(53, 53, 53)
-                                .addComponent(jLabel_fotoPlaneta)))
+                                .addComponent(jLabel_fotoPlaneta)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel_fechaPlaneta))))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(35, 35, 35)
                                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(35, 35, 35)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jLabel25)
+                                            .addComponent(jLabeltexto_satelite)
                                             .addComponent(jLabel_Satelite))
                                         .addGap(31, 31, 31)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jLabel26)
+                                            .addComponent(jLabeltexto_radioSatelite)
                                             .addComponent(jLabel_radioSatelite))
                                         .addGap(18, 18, 18)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jLabel27)
+                                            .addComponent(jLabeltexto_distanciaSatelite)
                                             .addComponent(jLabel_distanciaSatelite))
                                         .addGap(18, 18, 18)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jLabel28)
+                                            .addComponent(jLabeltexto_periodoSatelite)
                                             .addComponent(jLabel_periodoSatelite))
                                         .addGap(18, 18, 18)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jLabel29)
+                                            .addComponent(jLabeltexto_temperaturaSatelite)
                                             .addComponent(jLabel_temperaturaSatelite))
                                         .addGap(18, 18, 18)
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                            .addComponent(jLabel30)
+                                            .addComponent(jLabeltexto_tipoSatelite)
                                             .addComponent(jLabel_tipoSatelite)))
                                     .addComponent(jLabel_fotoSatelite, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 0, Short.MAX_VALUE))
+                                .addGap(10, 10, 10)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabeltexto_fechaSatelite)
+                                    .addComponent(jLabel_fechaSatelite))
+                                .addGap(20, 20, 20))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                                .addGap(50, 50, 50)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                     .addComponent(jLabel_tipoEstrella)
                                     .addComponent(jLabel3))
@@ -509,53 +546,117 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
 
     private void ComboBox_planetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboBox_planetasActionPerformed
         // TODO add your handling code here:
-                String selectedPlanet = (String) ComboBox_planetas.getSelectedItem();
+        String selectedPlanet = (String) ComboBox_planetas.getSelectedItem();
         updateSatelitesComboBox(selectedPlanet);
         updatePlanetInfo(selectedPlanet);
+        changeVisibilitySatelite(false);
     }//GEN-LAST:event_ComboBox_planetasActionPerformed
-    private void updateSatelitesComboBox(String category) {
-        ComboBox_satelites.removeAllItems();
-        ArrayList<String> options = optionsMap.get(category);
-        if (options != null) {
-            for (String option : options) {
-                ComboBox_satelites.addItem(option);
-            }
-        }
-    }
-    private void updatePlanetInfo(String planetName) {
-    try (Connection connection = DatabaseConnection.getConnection()) {
-        // Consulta SQL para obtener la información del planeta seleccionado
-        String sql = "SELECT * FROM planetas WHERE nombre = ?";
-        
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, planetName);
-            ResultSet resultSet = statement.executeQuery();
-            
-            if (resultSet.next()) {
-                // Actualizar los JLabel con la información del planeta
-                jLabel_planeta.setText(resultSet.getString("nombre"));
-                jLabel_radioPlaneta.setText(resultSet.getString("radio_km"));
-                jLabel_distanciaPlaneta.setText(resultSet.getString("distancia_media_sol_mkm"));
-                jLabel_periodoPlaneta.setText(resultSet.getString("periodo_orbital_dias"));
-                jLabel_temperaturaPlaneta.setText(resultSet.getString("temperatura_media_c"));
-                jLabel_TipoPlaneta.setText(resultSet.getString("tipo_planeta"));
-                jLabel_numSatelites.setText(resultSet.getString("numero_satelites"));
-                
-                // Obtener el nombre del archivo de imagen del planeta
-                String imageFileName = resultSet.getString("nombre") + ".jpg";
-                
-                // Cargar la imagen desde el directorio de recursos
-                ImageIcon planetImage = new ImageIcon(getClass().getResource("/" + imageFileName));
-                
-                // Establecer la imagen en el JLabel
-                jLabel_fotoPlaneta.setIcon(planetImage);
 
+    private void ComboBox_satelitesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboBox_satelitesActionPerformed
+        // TODO add your handling code here:
+        String selectedSatelite = (String) ComboBox_satelites.getSelectedItem();
+        updateSateliteInfo(selectedSatelite);
+        changeVisibilitySatelite(true);
+    }//GEN-LAST:event_ComboBox_satelitesActionPerformed
+    private void updateSatelitesComboBox(String planeta) {
+        ComboBox_satelites.removeAllItems();
+        ArrayList<String> satelites = optionsMap.get(planeta);
+        if (satelites != null) {
+            for (String satelite : satelites) {
+                ComboBox_satelites.addItem(satelite);
             }
         }
-    } catch (SQLException e) {
-        JOptionPane.showMessageDialog(this, "Error al obtener la información del planeta: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
-}
+
+    private void updatePlanetInfo(String nombrePlaneta) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            // Consulta SQL para obtener la información del planeta seleccionado
+            String sql = "SELECT * FROM planetas WHERE nombre = ?";
+            PreparedStatement statementPlanetaDetails = connection.prepareStatement(sql);
+            statementPlanetaDetails.setString(1, nombrePlaneta);
+            ResultSet resultSetPlaneta = statementPlanetaDetails.executeQuery();
+
+            if (resultSetPlaneta.next()) {
+                // Actualizar los JLabel con la información del planeta
+                jLabel_planeta.setText(resultSetPlaneta.getString("nombre"));
+                jLabel_radioPlaneta.setText(resultSetPlaneta.getString("radio_km")+" km");
+                jLabel_distanciaPlaneta.setText(resultSetPlaneta.getString("distancia_media_sol_mkm")+" Gm");
+                jLabel_periodoPlaneta.setText(resultSetPlaneta.getString("periodo_orbital_dias")+" dias");
+                jLabel_temperaturaPlaneta.setText(resultSetPlaneta.getString("temperatura_media_c")+" ºC");
+                jLabel_TipoPlaneta.setText(resultSetPlaneta.getString("tipo_planeta"));
+                jLabel_numSatelites.setText(resultSetPlaneta.getString("numero_satelites"));
+                jLabel_fechaPlaneta.setText(resultSetPlaneta.getString("fecha_creacion"));
+
+                // Nombre del archivo de la imagen
+                String imageFileName = resultSetPlaneta.getString("nombre") + ".jpg";
+
+                // Cargar la imagen
+                ImageIcon planetImage = new ImageIcon(getClass().getResource("/" + imageFileName));
+
+                // Cambiar el icon del jLabel
+                jLabel_fotoPlaneta.setIcon(planetImage);
+                
+                resultSetPlaneta.close();
+                statementPlanetaDetails.close();
+                connection.close();
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al obtener la información del planeta: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void updateSateliteInfo(String nombreSatelite) {
+        try {
+            Connection connection = DatabaseConnection.getConnection();
+            String sqlSateliteDetails = "SELECT * FROM satelites WHERE nombre = ?";
+            PreparedStatement statementSateliteDetails = connection.prepareStatement(sqlSateliteDetails);
+            statementSateliteDetails.setString(1, nombreSatelite);
+            ResultSet resultSetSatelite = statementSateliteDetails.executeQuery();
+            if (resultSetSatelite.next()) {
+                jLabel_Satelite.setText(resultSetSatelite.getString("nombre"));
+                jLabel_radioSatelite.setText(resultSetSatelite.getString("radio_km")+" km");
+                jLabel_distanciaSatelite.setText(resultSetSatelite.getString("distancia_media_planeta_km")+" km");
+                jLabel_periodoSatelite.setText(resultSetSatelite.getString("periodo_orbital_dias")+" dias");
+                jLabel_temperaturaSatelite.setText(resultSetSatelite.getString("temperatura_media_c")+" ºC");
+                jLabel_tipoSatelite.setText(resultSetSatelite.getString("tipo_cuerpo"));
+                jLabel_fechaSatelite.setText(resultSetSatelite.getString("fecha_creacion"));
+
+                // Nombre del archivo de la imagen
+                String imageFileName = resultSetSatelite.getString("nombre") + ".jpg";
+
+                // Cargar la imagen
+                ImageIcon SateliteImage = new ImageIcon(getClass().getResource("/" + imageFileName));
+
+                // Cambiar el icon del jLabel
+                jLabel_fotoSatelite.setIcon(SateliteImage);
+                
+            resultSetSatelite.close();
+            statementSateliteDetails.close();
+            connection.close();
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar los detalles del satélite: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    private void changeVisibilitySatelite(boolean visibilidad){
+                jLabel_Satelite.setVisible(visibilidad);
+                jLabel_radioSatelite.setVisible(visibilidad);
+                jLabel_distanciaSatelite.setVisible(visibilidad);
+                jLabel_periodoSatelite.setVisible(visibilidad);
+                jLabel_temperaturaSatelite.setVisible(visibilidad);
+                jLabel_tipoSatelite.setVisible(visibilidad);
+                jLabel_fotoSatelite.setVisible(visibilidad);
+                jLabeltexto_satelite.setVisible(visibilidad);
+                jLabeltexto_radioSatelite.setVisible(visibilidad);
+                jLabeltexto_distanciaSatelite.setVisible(visibilidad);
+                jLabeltexto_periodoSatelite.setVisible(visibilidad);
+                jLabeltexto_temperaturaSatelite.setVisible(visibilidad);
+                jLabeltexto_tipoSatelite.setVisible(visibilidad);
+                jLabel_fechaSatelite.setVisible(visibilidad);
+                jLabeltexto_fechaSatelite.setVisible(visibilidad);
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -599,18 +700,13 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel26;
-    private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel28;
-    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -622,6 +718,8 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
     private javax.swing.JLabel jLabel_distanciaPlaneta;
     private javax.swing.JLabel jLabel_distanciaSatelite;
     private javax.swing.JLabel jLabel_estrella;
+    private javax.swing.JLabel jLabel_fechaPlaneta;
+    private javax.swing.JLabel jLabel_fechaSatelite;
     private javax.swing.JLabel jLabel_fotoPlaneta;
     private javax.swing.JLabel jLabel_fotoSatelite;
     private javax.swing.JLabel jLabel_numSatelites;
@@ -636,6 +734,13 @@ HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
     private javax.swing.JLabel jLabel_temperaturaSatelite;
     private javax.swing.JLabel jLabel_tipoEstrella;
     private javax.swing.JLabel jLabel_tipoSatelite;
+    private javax.swing.JLabel jLabeltexto_distanciaSatelite;
+    private javax.swing.JLabel jLabeltexto_fechaSatelite;
+    private javax.swing.JLabel jLabeltexto_periodoSatelite;
+    private javax.swing.JLabel jLabeltexto_radioSatelite;
+    private javax.swing.JLabel jLabeltexto_satelite;
+    private javax.swing.JLabel jLabeltexto_temperaturaSatelite;
+    private javax.swing.JLabel jLabeltexto_tipoSatelite;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     // End of variables declaration//GEN-END:variables
