@@ -16,7 +16,7 @@ import javax.swing.JOptionPane;
 
 /**
  *
- * @author Usuario
+ * @author Jose Rivas Ceacero
  */
 public class JFramePrincipal extends javax.swing.JFrame {
 
