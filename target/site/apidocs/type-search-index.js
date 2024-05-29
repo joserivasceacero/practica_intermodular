@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes and Interfaces","u":"allclasses-index.html"},{"p":"medac.practica_intermodular","l":"DatabaseConnection"},{"p":"medac.practica_intermodular","l":"JFramePrincipal"}];updateSearchResults();
