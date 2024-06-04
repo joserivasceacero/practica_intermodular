@@ -15,7 +15,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 /**
- *
+ * Clase JFramePrincipal que representa la ventana principal de la aplicación.
+ * Carga datos desde una base de datos y los muestra en componentes gráficos.
+ * Permite seleccionar planetas y satélites y mostrar información detallada.
+ * 
  * @author Jose Rivas Ceacero
  */
 public class JFramePrincipal extends javax.swing.JFrame {
@@ -23,13 +26,15 @@ public class JFramePrincipal extends javax.swing.JFrame {
     HashMap<String, ArrayList<String>> optionsMap = new HashMap<>();
 
     /**
-     * Creates new form JFramePrincipal
+     * Crea una nueva instancia de JFramePrincipal.
      */
     public JFramePrincipal() {
         initComponents();
         loadDataFromDatabase();
     }
-
+    /**
+     * Carga los datos desde la base de datos y los almacena en componentes gráficos.
+     */
     private void loadDataFromDatabase() {
         optionsMap = new HashMap<>();
         try {
@@ -538,20 +543,34 @@ public class JFramePrincipal extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void ComboBox_planetasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboBox_planetasActionPerformed
+    /**
+     * Maneja la acción cuando se selecciona un planeta en el ComboBox.
+     * 
+     * @param evt El evento de acción.
+     */
+    private void ComboBox_planetasActionPerformed(java.awt.event.ActionEvent evt) {                                                  
         // TODO add your handling code here:
         String selectedPlanet = (String) ComboBox_planetas.getSelectedItem();
         updateSatelitesComboBox(selectedPlanet);
         updatePlanetInfo(selectedPlanet);
         changeVisibilitySatelite(false);
-    }//GEN-LAST:event_ComboBox_planetasActionPerformed
-
-    private void ComboBox_satelitesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboBox_satelitesActionPerformed
+    }                                                 
+    /**
+     * Maneja la acción cuando se selecciona un satélite en el ComboBox.
+     * 
+     * @param evt El evento de acción.
+     */
+    private void ComboBox_satelitesActionPerformed(java.awt.event.ActionEvent evt) {                                                   
         // TODO add your handling code here:
         String selectedSatelite = (String) ComboBox_satelites.getSelectedItem();
         updateSateliteInfo(selectedSatelite);
         changeVisibilitySatelite(true);
-    }//GEN-LAST:event_ComboBox_satelitesActionPerformed
+    }                                                  
+    /**
+     * Actualiza el ComboBox de satélites basado en el planeta seleccionado.
+     * 
+     * @param planeta El nombre del planeta seleccionado.
+     */
     private void updateSatelitesComboBox(String planeta) {
         ComboBox_satelites.removeAllItems();
         ArrayList<String> satelites = optionsMap.get(planeta);
@@ -561,7 +580,11 @@ public class JFramePrincipal extends javax.swing.JFrame {
             }
         }
     }
-
+    /**
+     * Actualiza la información del planeta seleccionado en los componentes gráficos.
+     * 
+     * @param nombrePlaneta El nombre del planeta seleccionado.
+     */
     private void updatePlanetInfo(String nombrePlaneta) {
         try {
             Connection connection = DatabaseConnection.getConnection();
@@ -599,7 +622,11 @@ public class JFramePrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al obtener la información del planeta: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
+    /**
+     * Actualiza la información del satélite seleccionado en los componentes gráficos.
+     * 
+     * @param nombreSatelite El nombre del satélite seleccionado.
+     */
     private void updateSateliteInfo(String nombreSatelite) {
         try {
             Connection connection = DatabaseConnection.getConnection();
@@ -633,6 +660,11 @@ public class JFramePrincipal extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Error al cargar los detalles del satélite: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    /**
+     * Cambia la visibilidad de los componentes relacionados con el satélite.
+     * 
+     * @param visibilidad Indica si los componentes deben ser visibles (true) o no (false).
+     */
     private void changeVisibilitySatelite(boolean visibilidad){
                 jLabel_Satelite.setVisible(visibilidad);
                 jLabel_radioSatelite.setVisible(visibilidad);
@@ -652,7 +684,9 @@ public class JFramePrincipal extends javax.swing.JFrame {
     }
 
     /**
-     * @param args the command line arguments
+     * El método main para iniciar la aplicación.
+     * 
+     * @param args Los argumentos de línea de comando.
      */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -685,7 +719,7 @@ public class JFramePrincipal extends javax.swing.JFrame {
             }
         });
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
+    // Variables declaration - do not modify                     
     private javax.swing.JComboBox<String> ComboBox_planetas;
     private javax.swing.JComboBox<String> ComboBox_satelites;
     private javax.swing.JLabel jLabel1;
@@ -737,5 +771,5 @@ public class JFramePrincipal extends javax.swing.JFrame {
     private javax.swing.JLabel jLabeltexto_tipoSatelite;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    // End of variables declaration//GEN-END:variables
+    // End of variables declaration                   
 }
