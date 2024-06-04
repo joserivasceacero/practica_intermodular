@@ -5,13 +5,18 @@
 package medac.practica_intermodular;
 
 /**
- *
- * @author Usuario
+ * Esta clase se encarga de gestionar la conexión a la base de datos.
+ * Proporciona un método estático para obtener una conexión a la base de datos MySQL.
+ * 
+ * @author Jose Rivas Ceacero
  */
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
+/**
+     * Obtiene una conexión a la base de datos MySQL.
+     * 
+     */ 
 public class DatabaseConnection {
     private static final String URL = "jdbc:mysql://localhost:3306/Practica_Intermodular";
     private static final String USER = "root";
@@ -21,3 +26,4 @@ public class DatabaseConnection {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 }
+
